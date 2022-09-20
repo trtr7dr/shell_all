@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# bash ./to_webp FOLDER_END_PARAM
+
+sudo apt install webp
+
+folder=$1;
+
+if  [[ $folder = "" ]]
+    then 
+	folder=`pwd`;
+    else
+	folder=$folder;
+fi
+
+start() {
+  local fullname="$1"
+  local endfolder="$2";
+  local filename=`basename "$1"`
+  local name="${filename%%.*}"
+  local formatfile=`file "$1" -b --mime-type`;
+  if  [[ $formatfile = "image/jpeg" || $formatfile = "image/png"  ]]
+    then
+	      cwebp -q 60 $fullname -o $endfolder/$name.webp
+  fi
+}
+
+scan() {
+  local x;
+  for e in "$1"/*; do
+    x=${e##*/}
+    if [ -d "$e" -a ! -L "$e" ]
+    then
+      scan "$e"
+    else
+      start "$e" "$folder"
+    fi
+  done
+}
+
+dir=`pwd`
+
+scan "$dir"
